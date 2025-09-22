@@ -1,125 +1,131 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Card, Table, Button, Input, Select, Badge } from "@/components/ui";
-import { apiCreateAccount, apiGetAccounts, apiUpdateAccount } from "@/lib/api";
-import { Account, AccountType } from "@/types";
 
-const accountTypeOptions = [
-  "ASSET",
-  "LIABILITY",
-  "EQUITY",
-  "REVENUE",
-  "EXPENSE",
-] as AccountType[];
+import React from "react";
+import { useForm } from "react-hook-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/client";
+import type { Account, AccountsResponse, AccountType } from "@/types/api";
+import { Button, Card, Input, Select, Textarea } from "@/components/ui";
 
-export default function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [loading, setLoading] = useState(true);
+type CreateAccountForm = {
+  code: string;
+  name: string;
+  type: AccountType;
+  description?: string;
+  parent_account_id?: string | null;
+};
 
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [type, setType] = useState<AccountType>("ASSET");
+export default function Page() {
+  const qc = useQueryClient();
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["accounts"],
+    queryFn: () => apiFetch<AccountsResponse>("/api/accounts"),
+  });
 
-  async function load() {
-    setLoading(true);
-    try {
-      const res = await apiGetAccounts();
-      setAccounts(res.data?.accounts || []);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateAccountForm>({
+    defaultValues: { type: "ASSET" },
+  });
 
-  useEffect(() => {
-    load();
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: (payload: CreateAccountForm) =>
+      apiFetch("/api/accounts", { method: "POST", body: JSON.stringify(payload) }),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["accounts"] });
+      reset({ code: "", name: "", type: "ASSET", description: "" });
+    },
+  });
 
-  async function createAccount(e: React.FormEvent) {
-    e.preventDefault();
-    await apiCreateAccount({ code, name, type });
-    setCode("");
-    setName("");
-    setType("ASSET");
-    await load();
-  }
-
-  async function updateAccount(a: Account, updates: Partial<Pick<Account, "name" | "description">>) {
-    await apiUpdateAccount(a.id, updates);
-    await load();
-  }
-
-  function typeBadge(t: AccountType) {
-    const tone = t === "REVENUE" ? "success" : t === "EXPENSE" ? "warning" : "info";
-    return <Badge tone={tone}>{t}</Badge>;
-  }
+  const onSubmit = (values: CreateAccountForm) => createMutation.mutate(values);
 
   return (
     <div className="space-y-6">
-      <Card title="Chart of Accounts" subtitle="Manage your accounts">
-        {loading ? (
-          <p className="text-sm text-gray-500">Loading…</p>
-        ) : (
-          <Table
-            columns={[
-              { header: "Code", cell: (a: Account) => a.code },
-              { header: "Name", cell: (a: Account) => (
-                <InlineEditText value={a.name} onSave={(val) => updateAccount(a, { name: val })} />
-              ) },
-              { header: "Type", cell: (a: Account) => typeBadge(a.type) },
-              { header: "Description", cell: (a: Account) => (
-                <InlineEditText value={a.description || ""} placeholder="Add description" onSave={(val) => updateAccount(a, { description: val })} />
-              ) },
-              { header: "Balance", cell: (a: Account) => (a.balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) , className: "text-right"},
-            ]}
-            rows={accounts}
-            keySelector={(a) => a.id}
-          />
-        )}
-      </Card>
-      <Card title="Create Account">
-        <form onSubmit={createAccount} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Input label="Code" value={code} onChange={(e) => setCode(e.target.value)} required />
-          <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <Select
-            label="Type"
-            value={type}
-            onChange={(e) => setType(e.target.value as AccountType)}
-            options={accountTypeOptions.map((t) => ({ label: t, value: t }))}
-          />
-          <div className="flex items-end">
-            <Button type="submit">Add</Button>
+      <h1 className="text-xl font-semibold">Chart of Accounts</h1>
+
+      <Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-5 gap-3" aria-label="Create account form">
+          <div>
+            <label className="text-sm">Code</label>
+            <Input aria-invalid={!!errors.code} {...register("code", { required: "Code is required" })} />
+            {errors.code && <p role="alert" className="text-xs text-red-600 mt-1">{errors.code.message}</p>}
+          </div>
+          <div className="md:col-span-2">
+            <label className="text-sm">Name</label>
+            <Input aria-invalid={!!errors.name} {...register("name", { required: "Name is required" })} />
+            {errors.name && <p role="alert" className="text-xs text-red-600 mt-1">{errors.name.message}</p>}
+          </div>
+          <div>
+            <label className="text-sm">Type</label>
+            <Select {...register("type", { required: true })} aria-label="Account type">
+              {["ASSET","LIABILITY","EQUITY","REVENUE","EXPENSE"].map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm">Parent</label>
+            <Select {...register("parent_account_id")} aria-label="Parent account">
+              <option value="">None</option>
+              {data?.data?.accounts?.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.code} - {a.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="md:col-span-5">
+            <label className="text-sm">Description</label>
+            <Textarea rows={2} {...register("description")} />
+          </div>
+          <div className="md:col-span-5 flex items-center gap-2">
+            <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
+              {createMutation.isPending ? "Creating..." : "Create Account"}
+            </Button>
+            {createMutation.isError && (
+              <span role="alert" className="text-sm text-red-600">
+                {(createMutation.error as Error)?.message}
+              </span>
+            )}
+            {createMutation.isSuccess && (
+              <span role="status" className="text-sm text-green-700">Account created.</span>
+            )}
           </div>
         </form>
       </Card>
-    </div>
-  );
-}
 
-function InlineEditText({ value, onSave, placeholder }: { value: string; placeholder?: string; onSave: (val: string) => Promise<void> | void }) {
-  const [editing, setEditing] = useState(false);
-  const [v, setV] = useState(value);
-  useEffect(() => setV(value), [value]);
-
-  async function submit() {
-    if (v !== value) {
-      await onSave(v);
-    }
-    setEditing(false);
-  }
-
-  if (!editing) {
-    return (
-      <div className="group flex items-center gap-2">
-        <span className={value ? "text-gray-900" : "text-gray-400"}>{value || placeholder || "—"}</span>
-        <button type="button" className="opacity-0 group-hover:opacity-100 text-blue-600 text-xs" onClick={() => setEditing(true)}>Edit</button>
-      </div>
-    );
-  }
-  return (
-    <div className="flex items-center gap-2">
-      <input className="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value={v} onChange={(e) => setV(e.target.value)} />
-      <button className="text-blue-600 text-xs" onClick={submit}>Save</button>
-      <button className="text-gray-500 text-xs" onClick={() => setEditing(false)}>Cancel</button>
+      <Card>
+        <h2 className="text-lg font-medium mb-3">Accounts</h2>
+        {isLoading && <div role="status">Loading accounts...</div>}
+        {isError && <div role="alert" className="text-red-600">{(error as Error)?.message}</div>}
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-left text-gray-600">
+                <th className="py-2 pr-4">Code</th>
+                <th className="py-2 pr-4">Name</th>
+                <th className="py-2 pr-4">Type</th>
+                <th className="py-2 pr-4">Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.data?.accounts?.map((a: Account) => (
+                <tr key={a.id} className="border-t">
+                  <td className="py-2 pr-4">{a.code}</td>
+                  <td className="py-2 pr-4">{a.name}</td>
+                  <td className="py-2 pr-4">{a.type}</td>
+                  <td className="py-2 pr-4">{a.balance ?? "-"}</td>
+                </tr>
+              ))}
+              {data?.data?.accounts?.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-3 text-gray-500">
+                    No accounts found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }

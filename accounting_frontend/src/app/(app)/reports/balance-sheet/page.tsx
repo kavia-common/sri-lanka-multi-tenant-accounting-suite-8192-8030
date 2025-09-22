@@ -1,83 +1,50 @@
 "use client";
-import React, { useState } from "react";
-import { Card, Button, Input } from "@/components/ui";
-import { apiBalanceSheet } from "@/lib/api";
 
-type BalanceSheetItem = {
-  name?: string;
-  code?: string;
-  amount?: string | number;
-  total?: string | number;
-  balance?: string | number;
-};
-
-type BalanceSheetData = {
-  assets: BalanceSheetItem[];
-  liabilities: BalanceSheetItem[];
-  equity: BalanceSheetItem[];
-};
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/client";
+import type { BalanceSheetResponse } from "@/types/api";
+import { Card, Input, Button } from "@/components/ui";
 
 export default function BalanceSheetPage() {
-  const [asOf, setAsOf] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [data, setData] = useState<BalanceSheetData | null>(null);
-  const [summary, setSummary] = useState<{ totalAssets: string; totalLiabilities: string; totalEquity: string; isBalanced: boolean } | null>(null);
+  const [asOf, setAsOf] = React.useState("");
 
-  async function run(e: React.FormEvent) {
+  const query = useQuery({
+    queryKey: ["reports", "balance-sheet", { asOf }],
+    queryFn: () => apiFetch<BalanceSheetResponse>(`/api/reports/balance-sheet${asOf ? `?as_of_date=${asOf}` : ""}`),
+  });
+
+  function run(e: React.FormEvent) {
     e.preventDefault();
-    const res = await apiBalanceSheet({ as_of_date: asOf });
-    setData(res.data?.balanceSheet || null);
-    setSummary(res.data?.summary || null);
+    void query.refetch();
   }
 
   return (
     <div className="space-y-6">
+      <h1 className="text-xl font-semibold">Balance Sheet</h1>
+
       <Card title="Balance Sheet" subtitle="Assets = Liabilities + Equity">
         <form onSubmit={run} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <Input label="As of Date" type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
+          <div>
+            <label className="text-sm">As of Date</label>
+            <Input type="date" value={asOf} onChange={(e) => setAsOf(e.target.value)} />
+          </div>
           <div className="flex items-end">
             <Button type="submit">Run</Button>
           </div>
         </form>
 
-        {data ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card title="Assets">
-              <SimpleList data={data.assets} />
-            </Card>
-            <Card title="Liabilities">
-              <SimpleList data={data.liabilities} />
-            </Card>
-            <Card title="Equity">
-              <SimpleList data={data.equity} />
-            </Card>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">Run the report to see results.</p>
-        )}
-
-        {summary && (
-          <div className="mt-4 text-sm text-gray-700">
-            <div>Total Assets: <strong>{summary.totalAssets}</strong></div>
-            <div>Total Liabilities: <strong>{summary.totalLiabilities}</strong></div>
-            <div>Total Equity: <strong>{summary.totalEquity}</strong></div>
-            <div>Status: <strong>{summary.isBalanced ? "Balanced" : "Not Balanced"}</strong></div>
+        {query.isLoading && <div role="status">Loading...</div>}
+        {query.isError && <div role="alert" className="text-red-600">{(query.error as Error).message}</div>}
+        {!query.isLoading && query.data?.data?.summary && (
+          <div className="text-sm text-gray-700 space-y-1">
+            <div>Total Assets: {query.data.data.summary.totalAssets}</div>
+            <div>Total Liabilities: {query.data.data.summary.totalLiabilities}</div>
+            <div>Total Equity: {query.data.data.summary.totalEquity}</div>
+            <div>Balanced: {query.data.data.summary.isBalanced ? "Yes" : "No"}</div>
           </div>
         )}
       </Card>
-    </div>
-  );
-}
-
-function SimpleList({ data }: { data: BalanceSheetItem[] }) {
-  if (!data?.length) return <p className="text-sm text-gray-500">No data</p>;
-  return (
-    <div className="space-y-2">
-      {data.map((row, idx) => (
-        <div key={idx} className="flex items-center justify-between text-sm">
-          <span className="text-gray-800">{row.name || row.code || "Item"}</span>
-          <span className="text-gray-900 font-medium">{String(row.amount ?? row.total ?? row.balance ?? "—")}</span>
-        </div>
-      ))}
     </div>
   );
 }

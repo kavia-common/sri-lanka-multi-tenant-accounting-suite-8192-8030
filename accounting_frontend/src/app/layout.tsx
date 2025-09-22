@@ -1,21 +1,40 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/context/auth";
+import { AppProviders } from "./providers";
+import Link from "next/link";
+import CompanySelector from "@/components/company-selector";
 
 export const metadata: Metadata = {
-  title: "OceanBooks | Multi-tenant Accounting",
-  description: "Modern accounting suite with double-entry bookkeeping and multi-tenant isolation.",
-  applicationName: "OceanBooks",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "Accounting Suite",
+  description: "Modern multi-tenant accounting app",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className="bg-[--bg] text-[--text]">
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-50">
-          <AuthProvider>{children}</AuthProvider>
-        </div>
+      <body className="min-h-screen bg-[#f9fafb] text-[#111827]" suppressHydrationWarning>
+        <AppProviders>
+          <header className="sticky top-0 z-40 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+            <div className="mx-auto max-w-7xl px-4 py-3 flex items-center gap-4">
+              <Link href="/" className="font-semibold text-[#2563EB]">Accounting</Link>
+              <nav className="flex items-center gap-3 text-sm">
+                <Link className="hover:text-[#2563EB]" href="/dashboard">Dashboard</Link>
+                <Link className="hover:text-[#2563EB]" href="/(app)/transactions">Transactions</Link>
+                <Link className="hover:text-[#2563EB]" href="/(app)/accounts">Accounts</Link>
+                <Link className="hover:text-[#2563EB]" href="/(app)/reports">Reports</Link>
+                <Link className="hover:text-[#2563EB]" href="/(app)/companies">Companies</Link>
+              </nav>
+              <div className="ml-auto">
+                <CompanySelector />
+              </div>
+            </div>
+          </header>
+          <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+        </AppProviders>
       </body>
     </html>
   );

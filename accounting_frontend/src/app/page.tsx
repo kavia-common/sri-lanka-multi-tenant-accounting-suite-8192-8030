@@ -1,17 +1,13 @@
-"use client";
-
-import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Home() {
-  useEffect(() => {
-    window.location.replace("/auth/login");
-  }, []);
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-amber-400 mx-auto mb-4 animate-pulse" />
-        <h1 className="text-2xl font-semibold text-gray-900">Redirecting to login…</h1>
+    <div className="p-4">
+      <h1 className="text-xl font-semibold">Welcome to Accounting Suite</h1>
+      <p className="text-gray-600 mt-2">Use the navigation to access features.</p>
+      <div className="mt-4">
+        <Link className="text-[#2563EB] underline" href="/dashboard">Go to Dashboard</Link>
       </div>
-    </main>
+    </div>
   );
 }
