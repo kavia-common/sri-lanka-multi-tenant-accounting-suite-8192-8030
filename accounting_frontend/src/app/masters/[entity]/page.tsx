@@ -6,8 +6,7 @@ import { Button, Card, CardBody, CardHeader, Table, TextInput } from "@/componen
 import { apiFetch } from "@/lib/api";
 import { getAuth } from "@/lib/auth";
 
-// Re-export server-only generateStaticParams to satisfy static export requirement
-export { generateStaticParams } from "./generate-static-params";
+
 
 type MasterRecord = { id?: string; name: string; code?: string; rate?: number; accountId?: string; };
 
@@ -25,6 +24,7 @@ export default function MastersEntityPage() {
 
   const [list, setList] = React.useState<MasterRecord[]>([]);
   const [form, setForm] = React.useState<MasterRecord>({ name: "", code: "", rate: undefined });
+  const [error, setError] = React.useState<string | null>(null);
   const auth = getAuth();
 
   const load = React.useCallback(async () => {
@@ -39,8 +39,24 @@ export default function MastersEntityPage() {
 
   React.useEffect(() => { if (entity) load(); }, [entity, load]);
 
+  function validate(): string | null {
+    if (!form.name?.trim()) return "Name is required.";
+    if (entity === "tax-rates") {
+      const r = typeof form.rate === "number" ? form.rate : Number(form.rate);
+      if (isNaN(r)) return "Tax rate must be a number.";
+      if (r < 0 || r > 100) return "Tax rate must be between 0 and 100.";
+    }
+    return null;
+  }
+
   async function create(e: React.FormEvent) {
     e.preventDefault();
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
+    setError(null);
     const apiEntity = entity.replace("-", "_");
     const res = await apiFetch(`/${apiEntity}`, {
       method: "POST",
@@ -52,7 +68,7 @@ export default function MastersEntityPage() {
     if (res.ok) {
       setForm({ name: "", code: "", rate: undefined });
       load();
-    } else alert(res.error || "Failed to create");
+    } else setError(res.error || "Failed to create");
   }
 
   return (
@@ -83,10 +99,13 @@ export default function MastersEntityPage() {
           <CardHeader title={`Create ${config.title.slice(0, -1)}`} />
           <CardBody>
             <form onSubmit={create} className="space-y-3">
-              <TextInput label={config.placeholders[0]} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <TextInput label={config.placeholders[0]} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} error={error?.toLowerCase().includes("name") ? error : undefined} />
               <TextInput label={config.placeholders[1]} value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} />
               {entity === "tax-rates" ? (
-                <TextInput label="Rate (%)" type="number" step="0.01" value={form.rate?.toString() || ""} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} />
+                <TextInput label="Rate (%)" type="number" step="0.01" value={form.rate?.toString() || ""} onChange={(e) => setForm({ ...form, rate: Number(e.target.value) })} error={error?.toLowerCase().includes("rate") ? error : undefined} />
+              ) : null}
+              {error && !error.toLowerCase().includes("name") && !error.toLowerCase().includes("rate") ? (
+                <p className="text-sm text-red-600">{error}</p>
               ) : null}
               <Button type="submit" variant="primary">Create</Button>
             </form>

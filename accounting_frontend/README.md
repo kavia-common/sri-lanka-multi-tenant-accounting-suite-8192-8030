@@ -28,12 +28,12 @@ OceanBooks is a modern, responsive accounting frontend for Sri Lankan multi-tena
 
 Open http://localhost:3000
 
-Tip: Set tenant/company in the top bar to scope requests. Provide token via a custom login in future updates or by seeding localStorage.
+Tip: Set tenant/company in the top bar to scope requests. Provide token via the Login page or by seeding localStorage.
 
 ## Notes
-- Auth: A lightweight storage exists (src/lib/auth.ts). Integrate actual login later to populate token.
+- Auth: Lightweight storage exists (src/lib/auth.ts). Use /login to set token, tenantId, and companyId until backend auth is wired.
 - API: Endpoints referenced from backend OpenAPI. Adjust field names as your backend evolves.
-- Styling: Tailwind v4 with custom components in src/components/ui.tsx
+- Styling: Tailwind v4 with custom components in src/components/ui.tsx and theme config at src/lib/config.ts
 
 ## Scripts
 - npm run dev — start dev server

@@ -23,8 +23,15 @@ export default function Home() {
     });
   }, [auth.companyId, auth.tenantId, auth.token]);
 
+  const showLoginHint = !auth?.token;
+
   return (
     <SidebarLayout>
+      {showLoginHint ? (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          You are not authenticated. Go to <a className="underline" href="/login">Login</a> to set your token, tenant, and company.
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader title="Welcome" subtitle="Ocean Professional Dashboard" />

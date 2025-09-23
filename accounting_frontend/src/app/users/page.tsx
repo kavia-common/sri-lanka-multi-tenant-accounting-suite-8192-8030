@@ -7,10 +7,15 @@ import { getAuth } from "@/lib/auth";
 
 type User = { id?: string; email: string; name?: string; roles?: string[] };
 
+function isValidEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export default function UsersPage() {
   const [list, setList] = React.useState<User[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [form, setForm] = React.useState<User>({ email: "", name: "", roles: ["user"] });
+  const [error, setError] = React.useState<string | null>(null);
 
   const auth = getAuth();
 
@@ -31,6 +36,11 @@ export default function UsersPage() {
 
   async function createUser(e: React.FormEvent) {
     e.preventDefault();
+    if (!isValidEmail(form.email)) {
+      setError("Please provide a valid email.");
+      return;
+    }
+    setError(null);
     const res = await apiFetch<User>("/users", {
       method: "POST",
       body: form,
@@ -42,7 +52,7 @@ export default function UsersPage() {
       setForm({ email: "", name: "", roles: ["user"] });
       load();
     } else {
-      alert(res.error || "Failed to create user");
+      setError(res.error || "Failed to create user");
     }
   }
 
@@ -81,6 +91,7 @@ export default function UsersPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                error={error?.toLowerCase().includes("email") ? error : undefined}
               />
               <TextInput
                 label="Name"
@@ -97,6 +108,9 @@ export default function UsersPage() {
                   })
                 }
               />
+              {error && !error.toLowerCase().includes("email") ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
               <Button type="submit" variant="primary" ariaLabel="Create user">
                 Create
               </Button>

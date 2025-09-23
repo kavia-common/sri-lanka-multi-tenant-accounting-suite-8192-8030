@@ -7,9 +7,18 @@ import { getAuth } from "@/lib/auth";
 
 type Journal = { id?: string; date: string; reference?: string; description?: string; total?: number };
 
+function validateJournal(j: Journal): string | null {
+  if (!j.date) return "Date is required.";
+  const d = new Date(j.date);
+  if (isNaN(d.getTime())) return "Invalid date.";
+  if (j.description && j.description.length > 200) return "Description too long (max 200).";
+  return null;
+}
+
 export default function JournalsPage() {
   const [list, setList] = React.useState<Journal[]>([]);
   const [form, setForm] = React.useState<Journal>({ date: new Date().toISOString().slice(0,10), reference: "", description: "" });
+  const [error, setError] = React.useState<string | null>(null);
   const auth = getAuth();
 
   const load = React.useCallback(async () => {
@@ -27,6 +36,12 @@ export default function JournalsPage() {
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
+    const v = validateJournal(form);
+    if (v) {
+      setError(v);
+      return;
+    }
+    setError(null);
     const res = await apiFetch("/journal_entries", {
       method: "POST",
       body: form,
@@ -37,7 +52,7 @@ export default function JournalsPage() {
     if (res.ok) {
       setForm({ date: new Date().toISOString().slice(0,10), reference: "", description: "" });
       load();
-    } else alert(res.error || "Failed to create journal");
+    } else setError(res.error || "Failed to create journal");
   }
 
   return (
@@ -69,9 +84,12 @@ export default function JournalsPage() {
           <CardHeader title="Create Journal" />
           <CardBody>
             <form onSubmit={create} className="space-y-3">
-              <TextInput label="Date" type="date" required value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+              <TextInput label="Date" type="date" required value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} error={error?.toLowerCase().includes("date") ? error : undefined} />
               <TextInput label="Reference" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
-              <TextInput label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <TextInput label="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} error={error?.toLowerCase().includes("description") ? error : undefined} />
+              {error && !error.toLowerCase().includes("date") && !error.toLowerCase().includes("description") ? (
+                <p className="text-sm text-red-600">{error}</p>
+              ) : null}
               <Button type="submit" variant="primary">Post Journal</Button>
             </form>
           </CardBody>

@@ -2,10 +2,17 @@
 import React from "react";
 import { OCEAN_PRO_THEME } from "@/lib/config";
 
+/**
+ * PUBLIC_INTERFACE
+ * Join className fragments.
+ */
 export function cn(...classes: Array<string | boolean | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * Card container component.
+ */
 export const Card: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className, children }) => (
   <div
     className={cn(
@@ -19,6 +26,9 @@ export const Card: React.FC<React.PropsWithChildren<{ className?: string }>> = (
   </div>
 );
 
+/**
+ * Card header with optional title/subtitle.
+ */
 export const CardHeader: React.FC<React.PropsWithChildren<{ title?: string; subtitle?: string }>> = ({
   title,
   subtitle,
@@ -31,10 +41,17 @@ export const CardHeader: React.FC<React.PropsWithChildren<{ title?: string; subt
   </div>
 );
 
+/**
+ * Card body.
+ */
 export const CardBody: React.FC<React.PropsWithChildren<{ className?: string }>> = ({ className, children }) => (
   <div className={cn("p-5", className)}>{children}</div>
 );
 
+/**
+ * PUBLIC_INTERFACE
+ * Button component with variants.
+ */
 export const Button: React.FC<
   React.PropsWithChildren<{ variant?: "primary" | "secondary" | "ghost" | "danger"; className?: string; type?: "button" | "submit" | "reset"; onClick?: () => void; ariaLabel?: string; disabled?: boolean }>
 > = ({ variant = "primary", className, children, type = "button", onClick, ariaLabel, disabled }) => {
@@ -58,6 +75,10 @@ export const Button: React.FC<
   );
 };
 
+/**
+ * PUBLIC_INTERFACE
+ * Text input with label and error rendering.
+ */
 export const TextInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string; error?: string }>(
   ({ label, hint, error, className, id, ...props }, ref) => {
     const inputId = id || `inp-${Math.random().toString(36).slice(2)}`;
@@ -87,6 +108,10 @@ export const TextInput = React.forwardRef<HTMLInputElement, React.InputHTMLAttri
 );
 TextInput.displayName = "TextInput";
 
+/**
+ * PUBLIC_INTERFACE
+ * Select with label and error rendering.
+ */
 export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; hint?: string; error?: string }>(
   ({ label, hint, error, className, id, children, ...props }, ref) => {
     const selectId = id || `sel-${Math.random().toString(36).slice(2)}`;
@@ -118,6 +143,10 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
 );
 Select.displayName = "Select";
 
+/**
+ * PUBLIC_INTERFACE
+ * Accessible table with headers and optional caption.
+ */
 export const Table: React.FC<React.PropsWithChildren<{ headers: string[]; caption?: string }>> = ({ headers, caption, children }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full divide-y divide-gray-200" role="table">

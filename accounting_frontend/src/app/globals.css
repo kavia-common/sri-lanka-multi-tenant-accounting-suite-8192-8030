@@ -38,6 +38,7 @@ a {
   min-height: 100vh;
 }
 
+/* Cards and headers */
 .card {
   background: var(--ocean-surface);
   border: 1px solid #e5e7eb;
@@ -53,4 +54,19 @@ a {
 .header .subtitle {
   font-size: 0.875rem;
   color: #6b7280;
+}
+
+/* Utilities */
+.container-responsive {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 1024px) {
+  .container-responsive { max-width: 1024px; }
+}
+@media (min-width: 1280px) {
+  .container-responsive { max-width: 1280px; }
 }

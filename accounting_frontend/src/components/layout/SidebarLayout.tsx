@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { getAuth, setAuth, clearAuth } from "@/lib/auth";
 import { Button, cn } from "@/components/ui";
+import { OCEAN_PRO_THEME } from "@/lib/config";
 
 const NAV = [
   { href: "/", label: "Dashboard" },
@@ -25,12 +26,14 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
   const [tenantId, setTenantId] = React.useState<string>("");
   const [companyId, setCompanyId] = React.useState<string>("");
   const [email, setEmail] = React.useState<string>("");
+  const [roles, setRoles] = React.useState<string[] | undefined>(undefined);
 
   React.useEffect(() => {
     const auth = getAuth();
     setTenantId(auth.tenantId || "");
     setCompanyId(auth.companyId || "");
     setEmail(auth.email || "");
+    setRoles(auth.roles || []);
   }, []);
 
   function updateAuth(k: "tenantId" | "companyId", v: string) {
@@ -47,13 +50,13 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
 
   return (
     <div
-      className="min-h-screen bg-[var(--bg-ocean)]"
-      style={{ ["--bg-ocean" as unknown as keyof React.CSSProperties]: "#f3f6fb" } as React.CSSProperties}
+      className="min-h-screen"
+      style={{ background: OCEAN_PRO_THEME.background }}
     >
       <div className="flex">
         <aside className="hidden md:flex w-64 flex-col gap-2 border-r border-gray-200 bg-white p-4">
           <div className="mb-2">
-            <Link href="/" className="text-lg font-semibold text-blue-700">
+            <Link href="/" className="text-lg font-semibold" style={{ color: OCEAN_PRO_THEME.primary }}>
               OceanBooks
             </Link>
             <p className="text-xs text-gray-500">Sri Lanka Accounting Suite</p>
@@ -79,8 +82,11 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
             </ul>
           </nav>
           <div className="mt-auto space-y-2">
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 flex items-center gap-2">
               {email ? <>Signed in as <span className="font-medium text-gray-700">{email}</span></> : "Not signed in"}
+              {roles && roles.length ? (
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] text-blue-700">{roles.join(", ")}</span>
+              ) : null}
             </div>
             <Button variant="ghost" className="w-full" onClick={onLogout} ariaLabel="Logout">
               Logout
@@ -88,31 +94,33 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
           </div>
         </aside>
         <main className="flex-1 min-w-0">
-          <header className="sticky top-0 z-10 bg-white border-b border-gray-200">
-            <div className="flex items-center gap-3 px-4 py-3">
-              <button
-                className="md:hidden rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100"
-                aria-label="Open navigation"
-                onClick={() => alert("Mobile navigation not implemented in demo")}
-              >
-                ☰
-              </button>
-              <div className="flex-1" />
-              <div className="flex items-center gap-3">
-                <input
-                  aria-label="Tenant ID"
-                  className="w-36 rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                  placeholder="Tenant ID"
-                  value={tenantId}
-                  onChange={(e) => updateAuth("tenantId", e.target.value)}
-                />
-                <input
-                  aria-label="Company ID"
-                  className="w-36 rounded-lg border border-gray-300 px-2 py-1 text-sm"
-                  placeholder="Company ID"
-                  value={companyId}
-                  onChange={(e) => updateAuth("companyId", e.target.value)}
-                />
+          <header className="sticky top-0 z-10 border-b border-gray-200" style={{ background: OCEAN_PRO_THEME.surface }}>
+            <div className="w-full" style={{ background: OCEAN_PRO_THEME.gradient }}>
+              <div className="flex items-center gap-3 px-4 py-3">
+                <button
+                  className="md:hidden rounded-md px-3 py-2 text-gray-700 hover:bg-gray-100"
+                  aria-label="Open navigation"
+                  onClick={() => alert("Mobile navigation not implemented in demo")}
+                >
+                  ☰
+                </button>
+                <div className="flex-1" />
+                <div className="flex items-center gap-3">
+                  <input
+                    aria-label="Tenant ID"
+                    className="w-36 rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                    placeholder="Tenant ID"
+                    value={tenantId}
+                    onChange={(e) => updateAuth("tenantId", e.target.value)}
+                  />
+                  <input
+                    aria-label="Company ID"
+                    className="w-36 rounded-lg border border-gray-300 px-2 py-1 text-sm"
+                    placeholder="Company ID"
+                    value={companyId}
+                    onChange={(e) => updateAuth("companyId", e.target.value)}
+                  />
+                </div>
               </div>
             </div>
           </header>
