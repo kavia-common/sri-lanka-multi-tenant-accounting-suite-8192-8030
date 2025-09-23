@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OceanBooks Frontend (Next.js)
 
-## Getting Started
+OceanBooks is a modern, responsive accounting frontend for Sri Lankan multi-tenant bookkeeping.
 
-First, run the development server:
+## Features
+- Ocean Professional theme (blue primary, amber accents), accessible and responsive
+- Sidebar layout with dashboard, topbar tenant/company selectors
+- CRUD UI integrated with backend REST API:
+  - Users (/users)
+  - Companies (/companies)
+  - Chart of Accounts (/chart_of_accounts)
+  - Journals (/journal_entries)
+  - Masters (generic: /{entity}) — customers, vendors, bank_accounts, tax_rates
+- Reports:
+  - Trial Balance (/general_ledger/trial_balance)
+  - Account Statement (/general_ledger/accounts/{accountId})
+- Sri Lankan compliance emphasis: VAT/NBT on Tax Rates, GAAP-friendly CoA
+- Centralized API client with multi-tenant headers
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup
+1. Copy environment variables:
+   cp .env.example .env
+   # Update NEXT_PUBLIC_API_BASE_URL to your backend host
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install and run:
+   npm install
+   npm run dev
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Tip: Set tenant/company in the top bar to scope requests. Provide token via a custom login in future updates or by seeding localStorage.
 
-## Learn More
+## Notes
+- Auth: A lightweight storage exists (src/lib/auth.ts). Integrate actual login later to populate token.
+- API: Endpoints referenced from backend OpenAPI. Adjust field names as your backend evolves.
+- Styling: Tailwind v4 with custom components in src/components/ui.tsx
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Scripts
+- npm run dev — start dev server
+- npm run build — production build
+- npm run start — run production server
+- npm run lint — lint code

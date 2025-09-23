@@ -1,10 +1,14 @@
 @import "tailwindcss";
 
+/* Ocean Professional Theme */
 :root {
-  --color-primary: #000000;
-  --color-secondary: #FFFFFF;
-  --color-accent: #3B82F6;
-  --color-background: #FFFFFF;
+  --ocean-primary: #2563EB;
+  --ocean-secondary: #F59E0B;
+  --ocean-success: #10B981;
+  --ocean-error: #EF4444;
+  --ocean-background: #f9fafb;
+  --ocean-surface: #ffffff;
+  --ocean-text: #111827;
 }
 
 * {
@@ -17,10 +21,36 @@ html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color: var(--color-background);
-  color: var(--color-primary);
+  background-color: var(--ocean-background);
+  color: var(--ocean-text);
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+}
+
+a {
+  color: var(--ocean-primary);
+}
+
+.app-container {
+  min-height: 100vh;
+}
+
+.card {
+  background: var(--ocean-surface);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.header .title {
+  font-size: 1.5rem;
+  color: var(--ocean-text);
+}
+
+.header .subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
