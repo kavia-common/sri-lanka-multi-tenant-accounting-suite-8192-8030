@@ -18,8 +18,11 @@ export default function Home() {
       companyId: auth.companyId,
       token: auth.token,
     }).then((res) => {
-      if (res.ok && res.data) setHealth(res.data.message);
-      else setHealth(res.error || "Backend not reachable");
+      if (res.ok) {
+        setHealth(res.data.message);
+      } else {
+        setHealth(res.error || "Backend not reachable");
+      }
     });
   }, [auth.companyId, auth.tenantId, auth.token]);
 
