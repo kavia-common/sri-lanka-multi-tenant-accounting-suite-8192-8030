@@ -1,6 +1,7 @@
 /* Jest setup for RTL and Next.js */
 import '@testing-library/jest-dom';
 import 'whatwg-fetch';
+import React from 'react';
 
 import { TextEncoder, TextDecoder } from 'util';
 if (typeof (global as any).TextEncoder === 'undefined') {
@@ -27,14 +28,12 @@ jest.mock('next/navigation', () => {
   };
 });
 
-// Next/link mock to render simple anchor for RTL
+// Next/link mock to render simple anchor for RTL without JSX to avoid syntax errors
 jest.mock('next/link', () => {
   return ({ href, children, ...rest }: any) => {
-    return (
-      <a href={typeof href === 'string' ? href : '#'} {...rest}>
-        {children}
-      </a>
-    );
+    const safeHref = typeof href === 'string' ? href : '#';
+    // Use React.createElement to avoid JSX in Jest setup context
+    return React.createElement('a', { href: safeHref, ...rest }, children);
   };
 });
 

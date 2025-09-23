@@ -33,23 +33,5 @@
     "jest-environment-jsdom": "^29.7.0",
     "whatwg-fetch": "^3.6.20",
     "ts-jest": "^29.2.5"
-  },
-  "jest": {
-    "preset": null,
-    "roots": [
-      "<rootDir>"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.ts"
-    ],
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    }
   }
 }
