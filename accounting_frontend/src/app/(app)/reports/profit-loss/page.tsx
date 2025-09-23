@@ -28,8 +28,14 @@ export default function ProfitLossPage() {
     <div className="space-y-6">
       <Card title="Profit & Loss" subtitle="Income statement for a date range">
         <form onSubmit={run} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <Input label="Start Date" type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-          <Input label="End Date" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
+          <div>
+            <label className="text-sm" htmlFor="pl-start">Start Date</label>
+            <Input id="pl-start" type="date" value={start} onChange={(e) => setStart(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm" htmlFor="pl-end">End Date</label>
+            <Input id="pl-end" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
+          </div>
           <div className="flex items-end">
             <Button type="submit">Run</Button>
           </div>
