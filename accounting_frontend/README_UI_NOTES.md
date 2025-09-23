@@ -1,33 +1,55 @@
-# UI Notes (Ocean Professional)
+# UI Notes: Ocean Professional Theme and New Pages
 
-- Layout: AppShell provides sidebar navigation + main content area. Responsive; sidebar collapses on mobile with a toggle.
-- Theme: Ocean Professional (blue primary #2563EB, amber accents #F59E0B). Subtle gradients via from-blue-500/10 to-gray-50, rounded corners, soft shadows.
-- Components: `Card`, `Button`, `Input`, `Select`, `Textarea` in src/components/ui.tsx are minimal, accessible, and used across pages.
-- Company Context: CompanySelector reads/sets current company and persists to localStorage as `selectedCompany`.
-- API Client: `src/lib/client.ts` adds Authorization and x-company-id headers automatically based on localStorage values.
-- Pages implemented:
-  - Dashboard (reports snapshot)
-  - Accounts (chart of accounts CRUD add + list)
-  - Transactions (journal entries with balancing helper)
-  - Reports (trial balance, balance sheet, profit & loss)
-  - Companies (create/list + updates CompanySelector)
-  - Customers (list/create)
-  - Vendors (list/create)
-  - Users (list/invite)
-- Accessibility: Forms include aria attributes, role alerts, and focus rings.
-- Auth:
-  - Login page stores `token` to localStorage.
-  - Logout clears auth and redirects.
+This update adds the remaining entity pages and reporting/compliance settings with a reusable set of components.
 
-## Environment
-- NEXT_PUBLIC_API_URL must be set (e.g., http://localhost:3001)
+Highlights
+- Ocean Professional components in src/components/ocean-theme.tsx (Card, Button, Input, Select, TextArea, DataTable)
+- API helper hooks in src/lib/hooks.ts include Authorization and x-company-id automatically
+- EntityScaffold for consistent listing + create forms
 
-## REST API
-- Headers: `Authorization: Bearer <token>`, `x-company-id: <uuid>`.
-- Error Handling: apiFetch throws Error with message parsed from response JSON when available.
+New Pages
+- Companies: /(app)/companies
+  - GET /api/companies
+  - POST /api/companies
 
-## Future Enhancements
-- Add pagination components
-- Add edit/delete for master data rows
-- Add role-based UI gating using claims from /api/auth/profile
-- Add toasts for non-blocking success/error messages
+- Chart of Accounts: /(app)/chart-of-accounts
+  - GET /api/accounts
+  - POST /api/accounts
+  - Notes: edits limited to PUT /api/accounts/{id} name/description by backend
+
+- Journal Entries: /(app)/journal-entries
+  - GET /api/transactions
+  - POST /api/transactions
+  - Loads accounts via GET /api/accounts for line selection
+
+- General Ledger: /(app)/general-ledger
+  - GET /api/reports/v2/general-ledger with period[] and account_id
+  - Client shows result rows in a table
+
+- Bank Accounts: /(app)/bank-accounts
+  - Assumed endpoints: GET/POST /api/bank-accounts (stub)
+  - Update paths when backend publishes OpenAPI
+
+- Tax Rates: /(app)/tax-rates
+  - Assumed endpoints: GET/POST /api/tax-rates (stub)
+  - Map to accounts for compliance reports in future
+
+- Currencies: /(app)/currencies
+  - Assumed endpoints: GET/POST /api/currencies (stub)
+
+- Reporting & Compliance Settings: /(app)/settings/reporting-compliance
+  - Launchpad to standard reports and Sri Lanka VAT Return
+  - Vat Return uses GET /api/reports/lk/vat-return with period_start/period_end
+
+Multi-tenancy
+- All API calls include x-company-id from context via useApi() headers; ensure CompanyProvider sets active company.
+
+Styling
+- Minimal global gradient in globals.css
+- Sidebar nav updated to include new sections
+
+Future Work
+- Implement edit forms/drawers for accounts and transactions
+- Add pagination and sorting to DataTable
+- Confirm and wire exact backend endpoints for bank accounts, tax rates, currencies
+- Add validation and error toasts

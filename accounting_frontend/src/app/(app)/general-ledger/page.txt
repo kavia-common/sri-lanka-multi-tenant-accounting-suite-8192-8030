@@ -1,0 +1,1 @@
+General Ledger page placeholder txt for static export compatibility.

@@ -39,8 +39,11 @@ export default function Page() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Chart of Accounts</h1>
+      <h1 className="text-xl font-semibold">Accounts</h1>
 
+      <div className="text-gray-700">
+        Looking for account management? Use the dedicated Chart of Accounts page.
+      </div>
       <Card>
         <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-5 gap-3" aria-label="Create account form">
           <div>

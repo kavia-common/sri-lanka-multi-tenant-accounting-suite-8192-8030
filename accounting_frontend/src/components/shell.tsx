@@ -17,9 +17,11 @@ const navGroups: { title: string; items: NavItem[] }[] = [
   {
     title: "Accounting",
     items: [
-      { href: "/(app)/transactions", label: "Journal" },
-      { href: "/(app)/accounts", label: "Chart of Accounts" },
+      { href: "/(app)/journal-entries", label: "Journal Entries" },
+      { href: "/(app)/chart-of-accounts", label: "Chart of Accounts" },
+      { href: "/(app)/general-ledger", label: "General Ledger" },
       { href: "/(app)/reports", label: "Reports" },
+      { href: "/(app)/settings/reporting-compliance", label: "Reporting & Compliance" },
     ],
   },
   {
@@ -27,6 +29,9 @@ const navGroups: { title: string; items: NavItem[] }[] = [
     items: [
       { href: "/(app)/customers", label: "Customers" },
       { href: "/(app)/vendors", label: "Vendors" },
+      { href: "/(app)/bank-accounts", label: "Bank Accounts" },
+      { href: "/(app)/tax-rates", label: "Tax Rates" },
+      { href: "/(app)/currencies", label: "Currencies" },
     ],
   },
   {
